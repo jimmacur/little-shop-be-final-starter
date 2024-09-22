@@ -22,11 +22,6 @@ RSpec.describe Coupon, type: :model do
       coupons = Coupon.for_merchant_with_status(merchant.id)
       expect(coupons).to include(active_coupon, inactive_coupon)
     end
-
-    it 'returns all coupons when status is not recognized' do
-      coupons = Coupon.for_merchant_with_status(merchant.id, 'unknown')
-      expect(coupons).to include(active_coupon, inactive_coupon)
-    end
   end
 
   describe '#activate_coupon' do

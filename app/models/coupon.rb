@@ -17,8 +17,6 @@ class Coupon < ApplicationRecord
       coupons.where(active: true)
     when 'inactive'
       coupons.where(active: false)
-    else
-      coupons
     end
   end
 
