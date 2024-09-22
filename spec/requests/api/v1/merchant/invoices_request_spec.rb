@@ -68,6 +68,8 @@ RSpec.describe "Merchant invoices endpoints" do
 
   describe 'GET /api/v1/merchants/:mercahnt_id/invoices' do
     before :each do
+      @merchant1 = create(:merchant)
+      @customer1 = create(:customer)
       @coupon = create(:coupon, merchant: @merchant1)
       @invoice_with_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: @coupon.id)
       @invoice_without_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: nil)
@@ -78,8 +80,5 @@ RSpec.describe "Merchant invoices endpoints" do
 
       expect(response).to be_successful
     end
-
   end
-
-
 end
