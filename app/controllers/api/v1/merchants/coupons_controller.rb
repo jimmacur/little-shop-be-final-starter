@@ -2,6 +2,7 @@ class Api::V1::Merchants::CouponsController < ApplicationController
   before_action :set_coupon, only: [:activate, :deactivate]
   
   def index
+    Rails.logger.info("Params received: #{params.inspect}")
     @coupons = Coupon.for_merchant_with_status(params[:merchant_id], params[:status])
     render json: CouponSerializer.new(@coupons)
   end

@@ -4,7 +4,7 @@ class Coupon < ApplicationRecord
 
   validates :name, presence: true
   validates :code, presence: true
-  validates :discount_type, inclusion: { in: ['dollar_off', 'percentage'] }
+  validates :discount_type, inclusion: { in: ['dollar_off', 'percentage_off'] }
   validates :discount_value, numericality: { greater_than: 0 }
 
 
@@ -13,9 +13,9 @@ class Coupon < ApplicationRecord
     return coupons unless status.present?
 
     case status
-    when 'active'
+    when 'true'
       coupons.where(active: true)
-    when 'inactive'
+    when 'false'
       coupons.where(active: false)
     end
   end
