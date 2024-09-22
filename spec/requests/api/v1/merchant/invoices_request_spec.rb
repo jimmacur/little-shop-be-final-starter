@@ -2,8 +2,8 @@ require "rails_helper"
 
 RSpec.describe "Merchant invoices endpoints" do
   before :each do
-    @merchant2 = create(:merchant)
     @merchant1 = create(:merchant)
+    @merchant2 = create(:merchant)
 
     @customer1 = create(:customer)
     @customer2 = create(:customer)
@@ -65,4 +65,21 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(json[:errors]).to be_a Array
     expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=100000")
   end
+
+  describe 'GET /api/v1/merchants/:mercahnt_id/invoices' do
+    before :each do
+      @coupon = create(:coupon, merchant: @merchant1)
+      @invoice_with_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: @coupon.id)
+      @invoice_without_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: nil)
+    end
+
+    it 'returns all invoices including the coupon_id' do
+      get "/api/v1/merchants/#{@merchant1.id}/invoices"
+
+      expect(response).to be_successful
+    end
+
+  end
+
+
 end
