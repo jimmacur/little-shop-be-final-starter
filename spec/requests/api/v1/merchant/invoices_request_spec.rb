@@ -66,19 +66,37 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=100000")
   end
 
-  describe 'GET /api/v1/merchants/:mercahnt_id/invoices' do
+  describe 'GET /api/v1/merchants/:merchant_id/invoices' do
     before :each do
       @merchant1 = create(:merchant)
       @customer1 = create(:customer)
       @coupon = create(:coupon, merchant: @merchant1)
-      @invoice_with_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: @coupon.id)
+      @invoice_with_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon: @coupon)
       @invoice_without_coupon = create(:invoice, merchant: @merchant1, customer: @customer1, coupon_id: nil)
     end
-
+  
     it 'returns all invoices including the coupon_id' do
       get "/api/v1/merchants/#{@merchant1.id}/invoices"
-
+  
       expect(response).to be_successful
+      json_response = JSON.parse(response.body, symbolize_names: true)
+      data = json_response[:data]
+  
+      expect(data.count).to eq(2)
+      expect(data[0][:attributes][:coupon_id]).to eq(@coupon.id)
+      expect(data[1][:attributes][:coupon_id]).to be_nil
+    end
+
+    it 'returns an empty array when there are no invoices for the merchant' do
+      empty_merchant = create(:merchant)
+  
+      get "/api/v1/merchants/#{empty_merchant.id}/invoices"
+  
+      expect(response).to be_successful
+      json_response = JSON.parse(response.body, symbolize_names: true)
+      data = json_response[:data]
+  
+      expect(data).to be_empty
     end
   end
 end
