@@ -45,6 +45,15 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(json[:data].count).to eq(1)
     expect(json[:data][0][:id]).to eq(@invoice2.id.to_s)
   end
+  
+  it "should return all invoices for merchant if no params" do
+    get "/api/v1/merchants/#{@merchant1.id}/invoices"
+
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(json[:data].count).to eq(4)
+  end
 
   it "should return 404 and error message when merchant is not found" do
     get "/api/v1/merchants/100000/customers"
