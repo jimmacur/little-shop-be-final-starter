@@ -10,6 +10,7 @@ class Coupon < ApplicationRecord
 
   def self.for_merchant_with_status(merchant_id, status = nil)
     coupons = for_merchant(merchant_id)
+
     return coupons unless status.present?
 
     case status
@@ -17,9 +18,8 @@ class Coupon < ApplicationRecord
       coupons.where(active: true)
     when 'inactive'
       coupons.where(active: false)
-    else
-      coupons
     end
+
   end
 
   def activate_coupon
