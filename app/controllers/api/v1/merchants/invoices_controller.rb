@@ -19,6 +19,35 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
       render json: { errors: "Invoice not found" }, status: :not_found
     end
   end
+
+
+  def update 
+    invoice = Invoice.find_by(id: params[:id], merchant_id: params[:merchant_id])
+
+    if invoice.update(invoice_params)
+      render json: InvoiceSerializer.new(invoice), status: :ok
+    else
+      render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def apply_coupon
+    invoice = Invoice.find(params[:id])
+    if invoice.update(coupon_id: params[:coupon_id])
+      render json: InvoiceSerializer.new(invoice), status: :ok
+    else
+      render_error(invoice)
+    end
+  end
+
+  def remove_coupon
+    invoice = Invoice.find(params[:id])
+    if invoice.update(coupon_id: nil)
+      render json: InvoiceSerializer.new(invoice), status: :ok
+    else
+      render_error(invoice)
+    end
+  end
 end
 
 private
@@ -36,18 +65,6 @@ end
 #       render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
 #     end
 #   end
-  
-#   def update 
-#     invoice = Invoice.find(params[:id])
-
-#     if invoice.update(invoice_params)
-#       render json: InvoiceSerializer.new(invoice)
-#     else
-#       render_error(invoice)
-#     end
-#   end
-
-
 
 #   def render_error(invoice)
 #     render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity

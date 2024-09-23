@@ -132,4 +132,26 @@ RSpec.describe "Merchant invoices endpoints" do
       expect(json[:data][:attributes][:coupon_id]).to be_nil
     end
   end
+
+  describe "GET /api/v1/merchants/:merchant_id/invoices/:id" do
+    it "returns a 404 error if the invoice is not found" do
+  
+      get "/api/v1/merchants/#{@merchant1.id}/invoices/9999"
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:not_found)
+      expect(json[:errors]).to eq("Invoice not found")
+    end
+  end
+
+  describe 'PATCH /api/v1/merchants/:merchant_id/invoices/:id/apply_coupon' do
+    it 'applies a coupon to the invoice' do
+      patch "/api/v1/merchants/#{@merchant1.id}/invoices/#{@invoice1.id}/apply_coupon", params: { coupon_id: @coupon.id }
+  
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:data][:attributes][:coupon_id]).to eq(@coupon.id)
+    end
+  end
 end
