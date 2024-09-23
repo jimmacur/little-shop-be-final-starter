@@ -7,8 +7,8 @@ class Api::V1::Merchants::CouponsController < ApplicationController
   end
 
   def show
-    @coupons = Coupon.find_by(id: params[:id], merchant_id: params[:merchant_id])
-    render json: CouponSerializer.new(@coupons)
+    @coupon = Coupon.find_by(id: params[:id], merchant_id: params[:merchant_id])
+    render json: CouponSerializer.new(@coupon)
   end
 
   def create
