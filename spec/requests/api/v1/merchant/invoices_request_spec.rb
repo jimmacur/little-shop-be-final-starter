@@ -154,4 +154,14 @@ RSpec.describe "Merchant invoices endpoints" do
       expect(json[:data][:attributes][:coupon_id]).to eq(@coupon.id)
     end
   end
+
+  describe 'PATCH /api/v1/merchants/:merchant_id/invoices/:id/remove_coupon' do
+    it 'removes the coupon from the invoice' do
+      patch "/api/v1/merchants/#{@merchant1.id}/invoices/#{@invoice1.id}/remove_coupon"
+  
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:data][:attributes][:coupon_id]).to be_nil
+    end
+  end
 end
