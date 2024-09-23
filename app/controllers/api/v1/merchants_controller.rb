@@ -10,6 +10,9 @@ class Api::V1::MerchantsController < ApplicationController
     end
 
     include_count = params[:count].present? && params[:count] == "true"
+
+    merchants_with_counts = Merchant.with_counts(merchants)
+
     render json: MerchantSerializer.new(merchants, { params: { count: include_count }})
   end
 
