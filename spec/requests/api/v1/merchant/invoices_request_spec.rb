@@ -145,6 +145,31 @@ RSpec.describe "Merchant invoices endpoints" do
     end
   end
 
+  describe "PATCH /api/v1/merchants/:merchant_id/invoices/:id/" do
+    before :each do
+      @merchant = create(:merchant)
+      @invoice = create(:invoice, merchant: @merchant, status: "pending")
+    end
+
+    it 'updates the invoices with valid parameters' do
+      patch "/api/v1/merchants/#{@merchant.id}/invoices/#{@invoice.id}", params: { invoice: { status: "shipped" } }
+
+      expect(response).to be_successful
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:data][:attributes][:status]).to eq("shipped")
+      expect(json[:data][:attributes][:merchant_id]).to eq(@merchant.id)
+    end
+
+    it 'returns an error when the update fails' do
+      patch "/api/v1/merchants/#{@merchant.id}/invoices/#{@invoice.id}", params: { invoice: { status: nil } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:errors]).to include("Status is not included in the list")
+    end
+
+  end
+
   describe 'PATCH /api/v1/merchants/:merchant_id/invoices/:id/apply_coupon' do
     it 'applies a coupon to the invoice' do
       patch "/api/v1/merchants/#{@merchant1.id}/invoices/#{@invoice1.id}/apply_coupon", params: { coupon_id: @coupon.id }
@@ -152,6 +177,14 @@ RSpec.describe "Merchant invoices endpoints" do
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body, symbolize_names: true)
       expect(json[:data][:attributes][:coupon_id]).to eq(@coupon.id)
+    end
+
+    it 'returns an error when applying a coupon to the invoice if coupon_is is invalid' do
+      patch "/api/v1/merchants/#{@merchant1.id}/invoices/#{@invoice1.id}/apply_coupon", params: { coupon_id: nil }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:errors]).to include("Coupon can't be blank")
     end
   end
 
@@ -162,6 +195,16 @@ RSpec.describe "Merchant invoices endpoints" do
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body, symbolize_names: true)
       expect(json[:data][:attributes][:coupon_id]).to be_nil
+    end
+
+    it 'returns an error when there is no coupon to remove' do
+      invoice_without_coupon = create(:invoice, merchant: @merchant1, coupon_id: nil)
+    
+      patch "/api/v1/merchants/#{@merchant1.id}/invoices/#{invoice_without_coupon.id}/remove_coupon"
+    
+      expect(response).to have_http_status(:unprocessable_entity)
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:errors]).to include("No coupon to remove")
     end
   end
 end

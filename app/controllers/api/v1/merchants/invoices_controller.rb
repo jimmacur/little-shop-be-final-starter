@@ -27,46 +27,37 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
     if invoice.update(invoice_params)
       render json: InvoiceSerializer.new(invoice), status: :ok
     else
-      render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
+      render_error(invoice)
     end
   end
 
   def apply_coupon
     invoice = Invoice.find(params[:id])
-    if invoice.update(coupon_id: params[:coupon_id])
+  
+    if params[:coupon_id].nil?
+      render json: { errors: ["Coupon can't be blank"] }, status: :unprocessable_entity
+    elsif invoice.update(coupon_id: params[:coupon_id])
       render json: InvoiceSerializer.new(invoice), status: :ok
-    else
-      render_error(invoice)
     end
   end
 
   def remove_coupon
     invoice = Invoice.find(params[:id])
-    if invoice.update(coupon_id: nil)
+    if invoice.coupon_id.nil?
+      render json: { errors: ["No coupon to remove"] }, status: :unprocessable_entity
+    elsif invoice.update(coupon_id: nil)
       render json: InvoiceSerializer.new(invoice), status: :ok
-    else
-      render_error(invoice)
     end
+  end
+
+  private
+
+  def invoice_params
+    params.require(:invoice).permit(:amount, :merchant_id, :status, :coupon_id)
+  end
+
+  def render_error(invoice)
+    render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
   end
 end
 
-private
-
-def invoice_params
-  params.require(:invoice).permit(:amount, :merchant_id, :status, :coupon_id)
-end
-
-#   def create
-#     merchant = Merchant.find(params[:merchant_id])
-#     invoice = merchant.invoices.new(invoice_params)
-#     if invoice.save
-#       render json: InvoiceSerializer.new(invoice), status: :created
-#     else
-#       render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
-#     end
-#   end
-
-#   def render_error(invoice)
-#     render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
-#   end
-# end
