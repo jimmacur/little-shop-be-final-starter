@@ -47,7 +47,7 @@ class Merchant < ApplicationRecord
   def self.with_counts(merchants)
     merchants.map do |merchant|
       {
-        id: merchant.id,
+        id: merchant.id.to_s,
         type: 'merchant',
         attributes: {
           name: merchant.name,
