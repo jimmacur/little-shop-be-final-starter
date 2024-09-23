@@ -187,7 +187,7 @@ RSpec.describe "Coupons", type: :request do
         FactoryBot.create(:coupon, merchant: merchant, active: true, discount_type: 'dollar_off', discount_value: 10)
       end
   
-      it 'does not activate the coupon and returns an error' do
+      it 'does not activate the coupon and returns an error when there are 5 actice coupons' do
         patch "/api/v1/merchants/#{merchant.id}/coupons/#{inactive_coupon.id}/activate"
   
         expect(response).to have_http_status(:forbidden)

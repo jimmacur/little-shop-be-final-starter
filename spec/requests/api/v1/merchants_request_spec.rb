@@ -74,6 +74,44 @@ describe "Merchant endpoints", :type => :request do
     end
   end
 
+  describe "GET /api/v1/merchants" do
+    let!(:merchant1) { create(:merchant) }
+    let!(:merchant2) { create(:merchant) }
+    let!(:coupon1) { create_list(:coupon, 3, merchant: merchant1) }
+    let!(:invoice1) { create_list(:invoice, 2, merchant: merchant1, coupon: coupon1.first) }
+    let!(:coupon2) { create_list(:coupon, 2, merchant: merchant2) }
+    let!(:invoice2) { create_list(:invoice, 0, merchant: merchant2) }
+
+    it "returns merchants with their coupon and invoice counts" do
+      get "/api/v1/merchants"
+
+      expect(response).to have_http_status(:success)
+
+      json_response = JSON.parse(response.body)
+
+      expect(json_response['data']).to match_array([
+        {
+          "id" => merchant1.id.to_s,
+          "type" => "merchant",
+          "attributes" => {
+            "name" => merchant1.name,
+            "coupons_count" => 3,
+            "invoice_coupon_count" => 2
+          }
+        },
+        {
+          "id" => merchant2.id.to_s,
+          "type" => "merchant",
+          "attributes" => {
+            "name" => merchant2.name,
+            "coupons_count" => 2,
+            "invoice_coupon_count" => 0
+          }
+        }
+      ])
+    end
+  end
+
   describe "get a merchant by id" do
     it "should return a single merchant with the correct id" do
       merchant = Merchant.create!(name: "Joe & Sons")

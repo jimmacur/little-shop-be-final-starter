@@ -27,7 +27,7 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
     if invoice.update(invoice_params)
       render json: InvoiceSerializer.new(invoice), status: :ok
     else
-      render_error(invoice)
+      render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -54,10 +54,6 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
 
   def invoice_params
     params.require(:invoice).permit(:amount, :merchant_id, :status, :coupon_id)
-  end
-
-  def render_error(invoice)
-    render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
   end
 end
 
