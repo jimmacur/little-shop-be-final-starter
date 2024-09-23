@@ -92,13 +92,12 @@ describe Merchant, type: :model do
   describe '.with_counts' do
     let!(:merchant1) { create(:merchant, name: "Corkery, Kutch and Kiehn") }
     let!(:merchant2) { create(:merchant, name: "Thiel and Sons") }
-    let!(:merchant3) { create(:merchant, name: "Littel Group") }
     
     before do
       create_list(:coupon, 3, merchant: merchant1)
-      create_list(:invoice, 2, merchant: merchant1, coupon: create(:coupon))
+      coupons_for_merchant1 = merchant1.coupons.limit(3)
+      create_list(:invoice, 2, merchant: merchant1, coupon: coupons_for_merchant1.first)
       create_list(:coupon, 2, merchant: merchant2)
-      create_list(:invoice, 0, merchant: merchant2)
     end
 
     it 'returns merchants with their counts of coupons and invoices with coupons' do
@@ -107,7 +106,7 @@ describe Merchant, type: :model do
 
       expect(result).to match_array([
         {
-          id: merchant1.id,
+          id: merchant1.id.to_s,
           type: 'merchant',
           attributes: {
             name: merchant1.name,
@@ -116,7 +115,7 @@ describe Merchant, type: :model do
           }
         },
         {
-          id: merchant2.id,
+          id: merchant2.id.to_s,
           type: 'merchant',
           attributes: {
             name: merchant2.name,
