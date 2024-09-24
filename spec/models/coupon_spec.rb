@@ -1,9 +1,9 @@
 require "rails_helper"
 
 RSpec.describe Coupon, type: :model do
-  let!(:merchant) { Merchant.create(name: "Test Merchant") }
-  let!(:active_coupon) { Coupon.create(name: "Active Coupon", code: "ACTIVE123", active: true, discount_type: 'dollar_off', discount_value: 10, merchant: merchant) }
-  let!(:inactive_coupon) { Coupon.create(name: "Inactive Coupon", code: "INACTIVE123", active: false, discount_type: 'percentage_off', discount_value: 20, merchant: merchant) }
+  let!(:merchant) { create(:merchant) } 
+  let!(:active_coupon) { create(:coupon, name: "Active Coupon", code: "ACTIVE123", active: true, discount_type: 'dollar_off', discount_value: 10, merchant: merchant) }
+  let!(:inactive_coupon) { create(:coupon, name: "Inactive Coupon", code: "INACTIVE123", active: false, discount_type: 'percentage_off', discount_value: 20, merchant: merchant) }
 
   describe '.for_merchant_with_status' do
     it 'returns only active coupons for merchant when selecting active' do

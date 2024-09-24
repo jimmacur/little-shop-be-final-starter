@@ -1,4 +1,6 @@
 class Api::V1::Merchants::InvoicesController < ApplicationController
+  before_action :set_invoice, only: [:show, :update, :apply_coupon, :remove_coupon]
+  
   def index
     merchant = Merchant.find(params[:merchant_id])
 
@@ -12,9 +14,8 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
 
 
   def show
-    invoice = Invoice.find_by(id: params[:id], merchant_id: params[:merchant_id])
-    if invoice
-      render json: InvoiceSerializer.new(invoice)
+    if @invoice
+      render_serialized(@invoice)
     else
       render json: { errors: "Invoice not found" }, status: :not_found
     end
@@ -22,31 +23,26 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
 
 
   def update 
-    invoice = Invoice.find_by(id: params[:id], merchant_id: params[:merchant_id])
-
-    if invoice.update(invoice_params)
-      render json: InvoiceSerializer.new(invoice), status: :ok
+    if @invoice.update(invoice_params)
+      render_serialized(@invoice)
     else
-      render json: { errors: invoice.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @invoice.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def apply_coupon
-    invoice = Invoice.find(params[:id])
-  
     if params[:coupon_id].nil?
       render json: { errors: ["Coupon can't be blank"] }, status: :unprocessable_entity
-    elsif invoice.update(coupon_id: params[:coupon_id])
-      render json: InvoiceSerializer.new(invoice), status: :ok
+    elsif @invoice.update(coupon_id: params[:coupon_id])
+      render_serialized(@invoice)
     end
   end
 
   def remove_coupon
-    invoice = Invoice.find(params[:id])
-    if invoice.coupon_id.nil?
+    if @invoice.coupon_id.nil?
       render json: { errors: ["No coupon to remove"] }, status: :unprocessable_entity
-    elsif invoice.update(coupon_id: nil)
-      render json: InvoiceSerializer.new(invoice), status: :ok
+    elsif @invoice.update(coupon_id: nil)
+      render_serialized(@invoice)
     end
   end
 
@@ -54,6 +50,14 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
 
   def invoice_params
     params.require(:invoice).permit(:amount, :merchant_id, :status, :coupon_id)
+  end
+
+  def set_invoice
+    @invoice = Invoice.find_by(id: params[:id], merchant_id: params[:merchant_id])
+  end
+
+  def render_serialized(invoice, status = :ok)
+    render json: InvoiceSerializer.new(invoice), status: status
   end
 end
 

@@ -87,17 +87,19 @@ RSpec.describe "Coupons", type: :request do
   end
 
   describe "POST /api/v1/merchants/:merchant_id/coupons" do
-    before do
-      @merchant = FactoryBot.create(:merchant)
-      @valid_attributes = {
+    let(:merchant) { FactoryBot.create(:merchant) }
+    let(:valid_attributes) do
+      {
         name: "Sample Coupon",
         code: "ABC123",
         active: true,
         discount_type: 'dollar_off',
         discount_value: 10,
       }
+    end
 
-      @invalid_attributes = {
+    let(:invalid_attributes) do
+      {
         name: nil,
         code: "ABC123",
         active: true,
@@ -105,9 +107,9 @@ RSpec.describe "Coupons", type: :request do
     end
 
     it 'returns an error when trying to create more than 5 active coupons' do
-      FactoryBot.create_list(:coupon, 5, merchant: @merchant, active: true, discount_type: 'dollar_off', discount_value: 10)
+      FactoryBot.create_list(:coupon, 5, merchant: merchant, active: true, discount_type: 'dollar_off', discount_value: 10)
       
-      post "/api/v1/merchants/#{@merchant.id}/coupons", params: { coupon: @valid_attributes }
+      post "/api/v1/merchants/#{merchant.id}/coupons", params: { coupon: valid_attributes }
   
       expect(response).to have_http_status(:forbidden)
       json_response = JSON.parse(response.body)
@@ -115,9 +117,9 @@ RSpec.describe "Coupons", type: :request do
     end
   
     it 'returns an error when the coupon code already exists' do
-      FactoryBot.create(:coupon, merchant: @merchant, code: @valid_attributes[:code], active: true, discount_type: 'dollar_off', discount_value: 10)
+      FactoryBot.create(:coupon, merchant: merchant, code: valid_attributes[:code], active: true, discount_type: 'dollar_off', discount_value: 10)
       
-      post "/api/v1/merchants/#{@merchant.id}/coupons", params: { coupon: @valid_attributes }
+      post "/api/v1/merchants/#{merchant.id}/coupons", params: { coupon: valid_attributes }
   
       expect(response).to have_http_status(:unprocessable_entity)
       json_response = JSON.parse(response.body)
@@ -125,7 +127,7 @@ RSpec.describe "Coupons", type: :request do
     end
 
     it 'creates a new coupon when request is valid' do
-      expect { post "/api/v1/merchants/#{@merchant.id}/coupons", params: { coupon: @valid_attributes } }.to change(Coupon, :count).by(1)
+      expect { post "/api/v1/merchants/#{merchant.id}/coupons", params: { coupon: valid_attributes } }.to change(Coupon, :count).by(1)
 
       expect(response).to have_http_status(:created)
       json_response = JSON.parse(response.body)
@@ -136,7 +138,7 @@ RSpec.describe "Coupons", type: :request do
     end
 
     it 'does not create a coupon when request is invalid' do
-      expect { post "/api/v1/merchants/#{@merchant.id}/coupons", params: { coupon: @invalid_attributes } }.to change(Coupon, :count).by(0)
+      expect { post "/api/v1/merchants/#{merchant.id}/coupons", params: { coupon: invalid_attributes } }.to change(Coupon, :count).by(0)
       expect(response).to have_http_status(:unprocessable_entity)
       json_response = JSON.parse(response.body)
       expect(json_response).to have_key("name")
@@ -146,7 +148,6 @@ RSpec.describe "Coupons", type: :request do
   describe "PATCH /api/v1/merchants/:merchant_id/coupons:id/deactivate" do
     let(:merchant) { FactoryBot.create(:merchant) }
     let(:coupon) { FactoryBot.create(:coupon, merchant: merchant, active: true, discount_type: 'dollar_off', discount_value: 10) }
-
 
     it 'deactivates the chosen active coupon' do
       expect(coupon.active).to be true
@@ -182,22 +183,18 @@ RSpec.describe "Coupons", type: :request do
       expect(inactive_coupon.active).to be true
     end
 
-    context 'when there are 5 active coupons' do
-      before do
-        FactoryBot.create(:coupon, merchant: merchant, active: true, discount_type: 'dollar_off', discount_value: 10)
-      end
-  
-      it 'does not activate the coupon and returns an error when there are 5 actice coupons' do
-        patch "/api/v1/merchants/#{merchant.id}/coupons/#{inactive_coupon.id}/activate"
-  
-        expect(response).to have_http_status(:forbidden)
-        json_response = JSON.parse(response.body)
-  
-        expect(json_response['error']).to eq("Maximum of 5 active coupons allowed.")
-        
-        inactive_coupon.reload
-        expect(inactive_coupon.active).to be false
-      end
+    it 'does not activate the coupon and returns an error when there are 5 actice coupons' do
+      FactoryBot.create(:coupon, merchant: merchant, active: true, discount_type: 'dollar_off', discount_value: 10)
+      
+      patch "/api/v1/merchants/#{merchant.id}/coupons/#{inactive_coupon.id}/activate"
+
+      expect(response).to have_http_status(:forbidden)
+      json_response = JSON.parse(response.body)
+
+      expect(json_response['error']).to eq("Maximum of 5 active coupons allowed.")
+      
+      inactive_coupon.reload
+      expect(inactive_coupon.active).to be false
     end
   end
 end

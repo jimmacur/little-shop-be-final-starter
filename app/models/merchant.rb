@@ -43,18 +43,4 @@ class Merchant < ApplicationRecord
   def self.find_one_merchant_by_name(name)
     Merchant.find_all_by_name(name).order("LOWER(name)").first
   end
-
-  def self.with_counts(merchants)
-    merchants.map do |merchant|
-      {
-        id: merchant.id.to_s,
-        type: 'merchant',
-        attributes: {
-          name: merchant.name,
-          coupons_count: merchant.coupons.count,
-          invoice_coupon_count: merchant.invoices.where.not(coupon_id: nil).count
-        }
-      }
-    end
-  end
 end

@@ -88,42 +88,4 @@ describe Merchant, type: :model do
       expect(other_merchant.invoices_filtered_by_status("packaged")).to eq([inv_4_packaged])
     end
   end
-
-  describe '.with_counts' do
-    let!(:merchant1) { create(:merchant, name: "Corkery, Kutch and Kiehn") }
-    let!(:merchant2) { create(:merchant, name: "Thiel and Sons") }
-    
-    before do
-      create_list(:coupon, 3, merchant: merchant1)
-      coupons_for_merchant1 = merchant1.coupons.limit(3)
-      create_list(:invoice, 2, merchant: merchant1, coupon: coupons_for_merchant1.first)
-      create_list(:coupon, 2, merchant: merchant2)
-    end
-
-    it 'returns merchants with their counts of coupons and invoices with coupons' do
-      merchants = Merchant.where(id: [merchant1.id, merchant2.id]) 
-      result = Merchant.with_counts(merchants)
-
-      expect(result).to match_array([
-        {
-          id: merchant1.id.to_s,
-          type: 'merchant',
-          attributes: {
-            name: merchant1.name,
-            coupons_count: 3,
-            invoice_coupon_count: 2
-          }
-        },
-        {
-          id: merchant2.id.to_s,
-          type: 'merchant',
-          attributes: {
-            name: merchant2.name,
-            coupons_count: 2,
-            invoice_coupon_count: 0
-          }
-        }
-      ])
-    end
-  end
 end

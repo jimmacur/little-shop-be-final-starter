@@ -11,7 +11,7 @@ RSpec.describe "Merchant invoices endpoints" do
     @coupon = create(:coupon, merchant: @merchant1)
 
     @invoice1 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "packaged", coupon_id: @coupon.id)
-    create_list(:invoice, 3, merchant_id: @merchant1.id, customer_id: @customer1.id) # shipped by default
+    create_list(:invoice, 3, merchant_id: @merchant1.id, customer_id: @customer1.id)
     @invoice2 = Invoice.create!(customer: @customer1, merchant: @merchant2, status: "shipped")
   end
 
