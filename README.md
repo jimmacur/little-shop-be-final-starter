@@ -6,12 +6,6 @@ This repo can be used as the starter repo for the Mod 2 final project.
 
 ## Setup
 
-```ruby
-bundle install
-rails db:{drop,create,migrate,seed}
-rails db:schema:dump
-```
-
 ```
 rails db:{drop,create}
 rails runner ActiveRecord::Tasks::DatabaseTasks.load_seed
