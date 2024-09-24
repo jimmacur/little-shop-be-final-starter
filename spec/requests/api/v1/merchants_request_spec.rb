@@ -235,6 +235,5 @@ describe "Merchant endpoints", :type => :request do
       
       expect(response).to have_http_status(:no_content)
     end
-
   end
 end
